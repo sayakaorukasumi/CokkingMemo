@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fdf6fb;
+  --foreground: #3d2b3d;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "YuGothic", "Yu Gothic", "Meiryo", sans-serif;
+}
+
+.input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid #fce7f3;
+  background-color: white;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: #374151;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.input:focus {
+  border-color: #f9a8d4;
+  box-shadow: 0 0 0 3px rgba(249, 168, 212, 0.15);
+}
+select.input {
+  appearance: auto;
+}
+
+.label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #4b5563;
+  margin-bottom: 0.25rem;
+}
+
+.btn-primary {
+  border-radius: 0.75rem;
+  background-color: #f472b6;
+  color: white;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  border: none;
+}
+.btn-primary:hover {
+  background-color: #ec4899;
+}
+
+.btn-secondary {
+  border-radius: 0.75rem;
+  background-color: white;
+  border: 1px solid #fbcfe8;
+  color: #ec4899;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+.btn-secondary:hover {
+  background-color: #fdf2f8;
+}
+
+.card {
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  border: 1px solid #fce7f3;
+  padding: 1rem;
+}

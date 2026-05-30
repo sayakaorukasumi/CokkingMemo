@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Recipe {
+  id            Int          @id @default(autoincrement())
+  name          String
+  photo         String?
+  ingredients   String       @default("")
+  instructions  String       @default("")
+  cookingTime   Int          @default(30)
+  energyLevel   Int          @default(2)
+  dishwashing   Int          @default(2)
+  vegPresence   String       @default("FINE")
+  calorie       Float?
+  protein       Float?
+  fat           Float?
+  carbs         Float?
+  fiber         Float?
+  tags          String       @default("")
+  kaoriComment  String?
+  kasumiComment String?
+  personalMemo  String?
+  isFavorite    Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  cookingLogs   CookingLog[]
+}
+
+model CookingLog {
+  id              Int      @id @default(autoincrement())
+  recipeId        Int
+  recipe          Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  cookedAt        DateTime
+  wentWell        Boolean  @default(true)
+  makeAgain       Boolean  @default(true)
+  improvementNote String?
+  createdAt       DateTime @default(now())
+}
