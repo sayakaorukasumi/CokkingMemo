@@ -1,20 +1,21 @@
+"use client";
+
 import Link from "next/link";
-import Image from "next/image";
 import { Heart, Clock, Zap } from "lucide-react";
 import type { Recipe } from "@/lib/types";
 import { ENERGY_LEVEL_LABELS } from "@/lib/types";
 
 export default function RecipeCard({ recipe }: { recipe: Recipe }) {
   return (
-    <Link href={`/recipes/${recipe.id}`} className="group block">
+    <Link href={`/recipes?id=${recipe.id}`} className="group block">
       <div className="bg-white rounded-2xl shadow-sm border border-pink-50 overflow-hidden hover:shadow-md transition-shadow">
         <div className="relative aspect-[4/3] bg-pink-50">
           {recipe.photo ? (
-            <Image
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
               src={recipe.photo}
               alt={recipe.name}
-              fill
-              className="object-cover"
+              className="w-full h-full object-cover"
             />
           ) : (
             <div className="flex items-center justify-center h-full text-4xl">

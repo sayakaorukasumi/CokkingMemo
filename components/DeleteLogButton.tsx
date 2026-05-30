@@ -1,16 +1,23 @@
 "use client";
 
-import { useTransition } from "react";
 import { X } from "lucide-react";
-import { deleteCookingLog } from "@/lib/actions";
+import { deleteLogById } from "@/lib/storage";
 
-export default function DeleteLogButton({ logId, recipeId }: { logId: number; recipeId: number }) {
-  const [isPending, startTransition] = useTransition();
+export default function DeleteLogButton({
+  logId,
+  onDelete,
+}: {
+  logId: number;
+  onDelete: () => void;
+}) {
+  function handleClick() {
+    deleteLogById(logId);
+    onDelete();
+  }
 
   return (
     <button
-      onClick={() => startTransition(() => deleteCookingLog(logId, recipeId))}
-      disabled={isPending}
+      onClick={handleClick}
       className="text-gray-300 hover:text-red-400 transition-colors"
     >
       <X size={14} />

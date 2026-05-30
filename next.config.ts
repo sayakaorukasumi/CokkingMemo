@@ -1,11 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  images: {
-    localPatterns: [
-      { pathname: "/uploads/**" },
-    ],
-  },
+  output: "export",
+  basePath: "/cokkingmemo",
+  images: { unoptimized: true },
 };
 
 export default nextConfig;

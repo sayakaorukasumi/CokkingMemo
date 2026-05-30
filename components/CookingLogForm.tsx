@@ -1,22 +1,35 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { addCookingLog } from "@/lib/actions";
+import { useState } from "react";
+import { addLog } from "@/lib/storage";
 
-export default function CookingLogForm({ recipeId }: { recipeId: number }) {
+export default function CookingLogForm({
+  recipeId,
+  onAdd,
+}: {
+  recipeId: number;
+  onAdd: () => void;
+}) {
   const [open, setOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const [saving, setSaving] = useState(false);
+
+  const today = new Date().toISOString().split("T")[0];
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    startTransition(async () => {
-      await addCookingLog(recipeId, formData);
-      setOpen(false);
+    setSaving(true);
+    const fd = new FormData(e.currentTarget);
+    addLog({
+      recipeId,
+      cookedAt: fd.get("cookedAt") as string,
+      wentWell: fd.get("wentWell") === "true",
+      makeAgain: fd.get("makeAgain") === "true",
+      improvementNote: (fd.get("improvementNote") as string) || "",
     });
+    setSaving(false);
+    setOpen(false);
+    onAdd();
   }
-
-  const today = new Date().toISOString().split("T")[0];
 
   if (!open) {
     return (
@@ -54,8 +67,8 @@ export default function CookingLogForm({ recipeId }: { recipeId: number }) {
         <textarea name="improvementNote" rows={2} className="input resize-none" placeholder="次はもう少し甘くしてみよう..." />
       </div>
       <div className="flex gap-2">
-        <button type="submit" disabled={isPending} className="btn-primary flex-1 disabled:opacity-50">
-          {isPending ? "保存中..." : "保存"}
+        <button type="submit" disabled={saving} className="btn-primary flex-1 disabled:opacity-50">
+          {saving ? "保存中..." : "保存"}
         </button>
         <button type="button" onClick={() => setOpen(false)} className="btn-secondary flex-1">
           キャンセル

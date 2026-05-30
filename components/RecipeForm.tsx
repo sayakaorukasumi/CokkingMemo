@@ -1,50 +1,87 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
-import Image from "next/image";
+import { useRef, useState } from "react";
 import { Upload, X } from "lucide-react";
-import { createRecipe, updateRecipe } from "@/lib/actions";
+import { createRecipe, updateRecipe } from "@/lib/storage";
 import { VEG_PRESENCE_LABELS, ENERGY_LEVEL_LABELS, DISHWASHING_LABELS } from "@/lib/types";
 import type { Recipe } from "@/lib/types";
 
-type Props = { recipe?: Recipe };
+type Props = { recipe?: Recipe; onSuccess: (id: number) => void };
 
-export default function RecipeForm({ recipe }: Props) {
-  const [isPending, startTransition] = useTransition();
+function compressImage(file: File): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new window.Image();
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      img.onload = () => {
+        const MAX = 800;
+        const ratio = Math.min(MAX / img.width, MAX / img.height, 1);
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * ratio);
+        canvas.height = Math.round(img.height * ratio);
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.8));
+      };
+      img.src = e.target!.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+export default function RecipeForm({ recipe, onSuccess }: Props) {
   const [photo, setPhoto] = useState<string>(recipe?.photo || "");
-  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploading(true);
-    try {
-      const fd = new FormData();
-      fd.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: fd });
-      const json = await res.json();
-      setPhoto(json.path);
-    } finally {
-      setUploading(false);
-    }
+    const compressed = await compressImage(file);
+    setPhoto(compressed);
   }
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    formData.set("photo", photo);
-    startTransition(() => {
+    setSaving(true);
+    try {
+      const fd = new FormData(e.currentTarget);
+      const data = {
+        name: fd.get("name") as string,
+        photo,
+        ingredients: (fd.get("ingredients") as string) || "",
+        instructions: (fd.get("instructions") as string) || "",
+        cookingTime: parseInt(fd.get("cookingTime") as string) || 30,
+        energyLevel: parseInt(fd.get("energyLevel") as string) || 2,
+        dishwashing: parseInt(fd.get("dishwashing") as string) || 2,
+        vegPresence: (fd.get("vegPresence") as string) || "FINE",
+        calorie: fd.get("calorie") ? parseFloat(fd.get("calorie") as string) : null,
+        protein: fd.get("protein") ? parseFloat(fd.get("protein") as string) : null,
+        fat: fd.get("fat") ? parseFloat(fd.get("fat") as string) : null,
+        carbs: fd.get("carbs") ? parseFloat(fd.get("carbs") as string) : null,
+        fiber: fd.get("fiber") ? parseFloat(fd.get("fiber") as string) : null,
+        tags: (fd.get("tags") as string) || "",
+        kaoriComment: (fd.get("kaoriComment") as string) || "",
+        kasumiComment: (fd.get("kasumiComment") as string) || "",
+        personalMemo: (fd.get("personalMemo") as string) || "",
+        isFavorite: recipe?.isFavorite ?? false,
+      };
+
       if (recipe) {
-        updateRecipe(recipe.id, formData);
+        updateRecipe(recipe.id, data);
+        onSuccess(recipe.id);
       } else {
-        createRecipe(formData);
+        const created = createRecipe(data);
+        onSuccess(created.id);
       }
-    });
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto">
+      {/* 写真 */}
       <div>
         <label className="label">写真</label>
         <div
@@ -53,7 +90,8 @@ export default function RecipeForm({ recipe }: Props) {
         >
           {photo ? (
             <>
-              <Image src={photo} alt="料理写真" fill className="object-cover" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={photo} alt="料理写真" className="w-full h-full object-cover" />
               <button
                 type="button"
                 className="absolute top-2 right-2 bg-white/80 rounded-full p-1"
@@ -65,27 +103,30 @@ export default function RecipeForm({ recipe }: Props) {
           ) : (
             <div className="flex flex-col items-center gap-2 text-pink-300">
               <Upload size={32} />
-              <span className="text-sm">{uploading ? "アップロード中..." : "写真を追加"}</span>
+              <span className="text-sm">写真を追加</span>
             </div>
           )}
         </div>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
       </div>
 
+      {/* 料理名 */}
       <div>
         <label className="label">料理名 <span className="text-pink-400">*</span></label>
         <input name="name" defaultValue={recipe?.name} required className="input" placeholder="例：鶏むね肉の照り焼き" />
       </div>
 
+      {/* 材料・作り方 */}
       <div>
         <label className="label">材料</label>
-        <textarea name="ingredients" defaultValue={recipe?.ingredients} rows={4} className="input resize-none" placeholder="鶏むね肉 200g&#10;しょうゆ 大さじ2&#10;..." />
+        <textarea name="ingredients" defaultValue={recipe?.ingredients} rows={4} className="input resize-none" placeholder={"鶏むね肉 200g\nしょうゆ 大さじ2\n..."} />
       </div>
       <div>
         <label className="label">作り方</label>
-        <textarea name="instructions" defaultValue={recipe?.instructions} rows={5} className="input resize-none" placeholder="1. 鶏肉を一口大に切る&#10;2. ..." />
+        <textarea name="instructions" defaultValue={recipe?.instructions} rows={5} className="input resize-none" placeholder={"1. 鶏肉を一口大に切る\n2. ..."} />
       </div>
 
+      {/* 基本情報 */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="label">調理時間（分）</label>
@@ -117,6 +158,7 @@ export default function RecipeForm({ recipe }: Props) {
         </div>
       </div>
 
+      {/* 栄養メモ */}
       <div>
         <label className="label">栄養メモ（任意）</label>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
@@ -135,11 +177,13 @@ export default function RecipeForm({ recipe }: Props) {
         </div>
       </div>
 
+      {/* タグ */}
       <div>
         <label className="label">タグ（カンマ区切り）</label>
         <input name="tags" defaultValue={recipe?.tags} className="input" placeholder="和食, 鶏肉, スピード, お弁当" />
       </div>
 
+      {/* コメント */}
       <div className="space-y-3">
         <div>
           <label className="label">薫コメント</label>
@@ -157,10 +201,10 @@ export default function RecipeForm({ recipe }: Props) {
 
       <button
         type="submit"
-        disabled={isPending || uploading}
+        disabled={saving}
         className="w-full btn-primary py-3 text-base font-semibold disabled:opacity-50"
       >
-        {isPending ? "保存中..." : recipe ? "更新する" : "登録する"}
+        {saving ? "保存中..." : recipe ? "更新する" : "登録する"}
       </button>
     </form>
   );

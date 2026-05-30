@@ -1,42 +1,45 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
+import { getRecipes } from "@/lib/storage";
+import type { Recipe } from "@/lib/types";
 import RecipeCard from "@/components/RecipeCard";
 import { ENERGY_LEVEL_LABELS } from "@/lib/types";
 import { Zap, Clock, ChevronRight } from "lucide-react";
 
-export default async function HomePage({
-  searchParams,
-}: {
-  searchParams: Promise<{ energy?: string; maxTime?: string }>;
-}) {
-  const params = await searchParams;
-  const energyFilter = params.energy ? parseInt(params.energy) : null;
-  const maxTimeFilter = params.maxTime ? parseInt(params.maxTime) : null;
+export default function HomePage() {
+  const [allRecipes, setAllRecipes] = useState<Recipe[]>([]);
+  const [energyFilter, setEnergyFilter] = useState("");
+  const [maxTimeFilter, setMaxTimeFilter] = useState("");
 
-  const candidates = await prisma.recipe.findMany({
-    where: {
-      ...(energyFilter !== null ? { energyLevel: { lte: energyFilter } } : {}),
-      ...(maxTimeFilter !== null ? { cookingTime: { lte: maxTimeFilter } } : {}),
-    },
-    orderBy: { updatedAt: "desc" },
-    take: 12,
-  });
+  useEffect(() => {
+    setAllRecipes(getRecipes());
+  }, []);
 
-  const favorites = await prisma.recipe.findMany({
-    where: { isFavorite: true },
-    orderBy: { updatedAt: "desc" },
-    take: 6,
-  });
+  const isFiltered = energyFilter !== "" || maxTimeFilter !== "";
 
-  const recent = await prisma.recipe.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 6,
-  });
+  const candidates = allRecipes
+    .filter((r) => {
+      if (energyFilter && r.energyLevel > parseInt(energyFilter)) return false;
+      if (maxTimeFilter && r.cookingTime > parseInt(maxTimeFilter)) return false;
+      return true;
+    })
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+    .slice(0, 12);
 
-  const isFiltered = energyFilter !== null || maxTimeFilter !== null;
+  const favorites = allRecipes
+    .filter((r) => r.isFavorite)
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+    .slice(0, 6);
+
+  const recent = allRecipes
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .slice(0, 6);
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-8">
+      {/* Hero */}
       <div className="text-center py-4">
         <h1 className="text-2xl font-bold" style={{ color: "#d4719c" }}>
           今日、何を作ろうか？
@@ -44,14 +47,19 @@ export default async function HomePage({
         <p className="text-sm text-gray-400 mt-1">気力と時間で絞り込んでみよう</p>
       </div>
 
-      <form className="card space-y-3">
+      {/* フィルター */}
+      <div className="card space-y-3">
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="label" style={{ display: "flex", alignItems: "center", gap: "4px" }}>
               <Zap size={14} style={{ color: "#facc15" }} />
               今日の気力
             </label>
-            <select name="energy" defaultValue={params.energy ?? ""} className="input">
+            <select
+              value={energyFilter}
+              onChange={(e) => setEnergyFilter(e.target.value)}
+              className="input"
+            >
               <option value="">気力を選ばない</option>
               {[1, 2, 3, 4].map((v) => (
                 <option key={v} value={v}>{v} - {ENERGY_LEVEL_LABELS[v]}以下</option>
@@ -63,7 +71,11 @@ export default async function HomePage({
               <Clock size={14} style={{ color: "#60a5fa" }} />
               最大調理時間
             </label>
-            <select name="maxTime" defaultValue={params.maxTime ?? ""} className="input">
+            <select
+              value={maxTimeFilter}
+              onChange={(e) => setMaxTimeFilter(e.target.value)}
+              className="input"
+            >
               <option value="">時間を選ばない</option>
               <option value="15">15分以内</option>
               <option value="30">30分以内</option>
@@ -72,16 +84,17 @@ export default async function HomePage({
             </select>
           </div>
         </div>
-        <button type="submit" className="btn-primary" style={{ width: "100%" }}>
-          候補を表示
-        </button>
         {isFiltered && (
-          <Link href="/" style={{ display: "block", textAlign: "center", fontSize: "0.75rem", color: "#9ca3af" }}>
+          <button
+            onClick={() => { setEnergyFilter(""); setMaxTimeFilter(""); }}
+            style={{ display: "block", width: "100%", textAlign: "center", fontSize: "0.75rem", color: "#9ca3af", background: "none", border: "none", cursor: "pointer" }}
+          >
             絞り込みをクリア
-          </Link>
+          </button>
         )}
-      </form>
+      </div>
 
+      {/* 今日の候補 */}
       {isFiltered && (
         <section>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
@@ -105,6 +118,7 @@ export default async function HomePage({
         </section>
       )}
 
+      {/* お気に入り */}
       {favorites.length > 0 && (
         <section>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
@@ -119,6 +133,7 @@ export default async function HomePage({
         </section>
       )}
 
+      {/* 最近追加したレシピ */}
       <section>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
           <h2 style={{ fontWeight: 600, color: "#374151" }}>最近追加したレシピ</h2>

@@ -1,7 +1,36 @@
-import type { Recipe, CookingLog } from "@/app/generated/prisma/client";
-export type { Recipe, CookingLog };
+export interface Recipe {
+  id: number;
+  name: string;
+  photo: string;
+  ingredients: string;
+  instructions: string;
+  cookingTime: number;
+  energyLevel: number;
+  dishwashing: number;
+  vegPresence: string;
+  calorie: number | null;
+  protein: number | null;
+  fat: number | null;
+  carbs: number | null;
+  fiber: number | null;
+  tags: string;
+  kaoriComment: string;
+  kasumiComment: string;
+  personalMemo: string;
+  isFavorite: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
-export type RecipeWithLogs = Recipe & { cookingLogs: CookingLog[] };
+export interface CookingLog {
+  id: number;
+  recipeId: number;
+  cookedAt: string;
+  wentWell: boolean;
+  makeAgain: boolean;
+  improvementNote: string;
+  createdAt: string;
+}
 
 export const VEG_PRESENCE_LABELS: Record<string, string> = {
   HIDDEN: "見えない",
