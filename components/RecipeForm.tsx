@@ -32,6 +32,7 @@ function compressImage(file: File): Promise<string> {
 export default function RecipeForm({ recipe, onSuccess }: Props) {
   const [photo, setPhoto] = useState<string>(recipe?.photo || "");
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -43,6 +44,7 @@ export default function RecipeForm({ recipe, onSuccess }: Props) {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSaving(true);
+    setSaveError(null);
     try {
       const fd = new FormData(e.currentTarget);
       const data = {
@@ -73,6 +75,9 @@ export default function RecipeForm({ recipe, onSuccess }: Props) {
         const created = createRecipe(data);
         onSuccess(created.id);
       }
+    } catch (err) {
+      console.error(err);
+      setSaveError("保存に失敗しました。写真なしで試してみてください。");
     } finally {
       setSaving(false);
     }
@@ -197,6 +202,12 @@ export default function RecipeForm({ recipe, onSuccess }: Props) {
           <textarea name="personalMemo" defaultValue={recipe?.personalMemo ?? ""} rows={2} className="input resize-none" placeholder="次回こうしてみよう..." />
         </div>
       </div>
+
+      {saveError && (
+        <div style={{ background: "#fff0f3", border: "1px solid #fca5a5", borderRadius: "0.75rem", padding: "0.75rem 1rem", color: "#dc2626", fontSize: "0.875rem" }}>
+          {saveError}
+        </div>
+      )}
 
       <button
         type="submit"
