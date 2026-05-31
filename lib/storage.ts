@@ -17,11 +17,13 @@ export function getRecipes(): Recipe[] {
 }
 
 function saveRecipes(recipes: Recipe[]): void {
+  const payload = JSON.stringify(recipes);
   try {
-    localStorage.setItem(RECIPES_KEY, JSON.stringify(recipes));
+    localStorage.setItem(RECIPES_KEY, payload);
   } catch (e) {
-    if (e instanceof DOMException && e.name === "QuotaExceededError") {
-      throw new Error("QUOTA");
+    if (e instanceof DOMException && (e.name === "QuotaExceededError" || e.code === 22)) {
+      const kb = Math.round(payload.length / 1024);
+      throw new Error(`QUOTA:${kb}`);
     }
     throw new Error("STORAGE_UNAVAILABLE");
   }
