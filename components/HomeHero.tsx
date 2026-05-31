@@ -1,7 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
+
+// 静的エクスポート時に basePath が付かない問題を避けるため、
+// 画像パスは next.config.ts の basePath を明示的に前置きする。
+const BASE_PATH = "/CokkingMemo";
+const HERO_SRC = `${BASE_PATH}/images/recipe-home-hero.png`;
 
 export default function HomeHero() {
   const [imgError, setImgError] = useState(false);
@@ -40,16 +44,20 @@ export default function HomeHero() {
             overflow: "hidden",
             background: "linear-gradient(160deg, #fdf2f8 0%, #fff8fb 100%)",
             boxShadow: "0 3px 18px rgba(212,113,156,0.13)",
-            position: "relative",
             height: "168px",
           }}
         >
-          <Image
-            src="/images/recipe-home-hero.png"
+          {/* next/image だと静的書き出しで basePath が抜けるため通常の img を使う */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={HERO_SRC}
             alt="さやごはん帳 - さや、薫、霞がキッチンで料理している"
-            fill
-            style={{ objectFit: "contain", objectPosition: "center bottom" }}
-            priority
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
+              objectPosition: "center bottom",
+            }}
             onError={() => setImgError(true)}
           />
         </div>
