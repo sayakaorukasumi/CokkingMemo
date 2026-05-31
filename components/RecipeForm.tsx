@@ -8,23 +8,47 @@ import type { Recipe } from "@/lib/types";
 
 type Props = { recipe?: Recipe; onSuccess: (id: number) => void };
 
+// localStorage は容量が小さいので、1枚あたり約 250KB 以下を目標に
+// 解像度と画質を段階的に下げながら圧縮する。
+const TARGET_BYTES = 250_000;
+
 function compressImage(file: File): Promise<string> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const img = new window.Image();
     const reader = new FileReader();
     reader.onload = (e) => {
       img.onload = () => {
-        const MAX = 800;
-        const ratio = Math.min(MAX / img.width, MAX / img.height, 1);
-        const canvas = document.createElement("canvas");
-        canvas.width = Math.round(img.width * ratio);
-        canvas.height = Math.round(img.height * ratio);
-        const ctx = canvas.getContext("2d")!;
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL("image/jpeg", 0.8));
+        // 試す解像度と画質の組み合わせ（大きい→小さい）
+        const attempts: { max: number; quality: number }[] = [
+          { max: 720, quality: 0.6 },
+          { max: 600, quality: 0.55 },
+          { max: 480, quality: 0.5 },
+          { max: 360, quality: 0.45 },
+        ];
+
+        let result = "";
+        for (const { max, quality } of attempts) {
+          const ratio = Math.min(max / img.width, max / img.height, 1);
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.round(img.width * ratio);
+          canvas.height = Math.round(img.height * ratio);
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            reject(new Error("IMAGE_DECODE"));
+            return;
+          }
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          result = canvas.toDataURL("image/jpeg", quality);
+          // dataURL の長さからおおよそのバイト数を見積もる
+          const approxBytes = Math.ceil((result.length - "data:image/jpeg;base64,".length) * 0.75);
+          if (approxBytes <= TARGET_BYTES) break;
+        }
+        resolve(result);
       };
+      img.onerror = () => reject(new Error("IMAGE_DECODE"));
       img.src = e.target!.result as string;
     };
+    reader.onerror = () => reject(new Error("IMAGE_DECODE"));
     reader.readAsDataURL(file);
   });
 }
@@ -37,8 +61,13 @@ export default function RecipeForm({ recipe, onSuccess }: Props) {
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    const compressed = await compressImage(file);
-    setPhoto(compressed);
+    setSaveError(null);
+    try {
+      const compressed = await compressImage(file);
+      setPhoto(compressed);
+    } catch {
+      setSaveError("写真を読み込めませんでした。別の写真で試してみてください。");
+    }
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
