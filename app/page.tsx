@@ -7,6 +7,7 @@ import type { Recipe } from "@/lib/types";
 import RecipeCard from "@/components/RecipeCard";
 import { ENERGY_LEVEL_LABELS } from "@/lib/types";
 import { Zap, Clock, ChevronRight } from "lucide-react";
+import HomeHero from "@/components/HomeHero";
 
 export default function HomePage() {
   const [allRecipes, setAllRecipes] = useState<Recipe[]>([]);
@@ -39,13 +40,7 @@ export default function HomePage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-8">
-      {/* Hero */}
-      <div className="text-center py-4">
-        <h1 className="text-2xl font-bold" style={{ color: "#d4719c" }}>
-          今日、何を作ろうか？
-        </h1>
-        <p className="text-sm text-gray-400 mt-1">気力と時間で絞り込んでみよう</p>
-      </div>
+      <HomeHero />
 
       {/* フィルター */}
       <div className="card space-y-3">
