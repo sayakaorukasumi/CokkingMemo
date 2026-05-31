@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 
-// 静的エクスポート時に basePath が付かない問題を避けるため、
-// 画像パスは next.config.ts の basePath を明示的に前置きする。
 const BASE_PATH = "/CokkingMemo";
 const HERO_SRC = `${BASE_PATH}/images/recipe-home-hero.png`;
 
@@ -12,7 +10,6 @@ export default function HomeHero() {
 
   return (
     <div style={{ textAlign: "center", padding: "0.5rem 0 0.25rem" }}>
-      {/* タイトル */}
       <h1
         style={{
           fontSize: "1.6rem",
@@ -35,7 +32,6 @@ export default function HomeHero() {
         作れたごはんを、少しずつ増やす
       </p>
 
-      {/* ヒーロー画像バナー */}
       {!imgError && (
         <div
           style={{
@@ -47,7 +43,6 @@ export default function HomeHero() {
             height: "168px",
           }}
         >
-          {/* next/image だと静的書き出しで basePath が抜けるため通常の img を使う */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={HERO_SRC}
@@ -57,13 +52,13 @@ export default function HomeHero() {
               height: "100%",
               objectFit: "contain",
               objectPosition: "center bottom",
+              mixBlendMode: "multiply",
             }}
             onError={() => setImgError(true)}
           />
         </div>
       )}
 
-      {/* 画像がない場合のやさしいプレースホルダー */}
       {imgError && (
         <div
           style={{
