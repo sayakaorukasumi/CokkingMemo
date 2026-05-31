@@ -77,7 +77,14 @@ export default function RecipeForm({ recipe, onSuccess }: Props) {
       }
     } catch (err) {
       console.error(err);
-      setSaveError("保存に失敗しました。写真なしで試してみてください。");
+      const msg = err instanceof Error ? err.message : "";
+      if (msg === "QUOTA") {
+        setSaveError("保存できませんでした。写真のサイズが大きすぎる可能性があります。写真なしで試してみてください。");
+      } else if (msg === "STORAGE_UNAVAILABLE") {
+        setSaveError("保存できませんでした。Safariのプライベートブラウジングをオフにして、もう一度試してください。");
+      } else {
+        setSaveError("保存に失敗しました。もう一度試してみてください。");
+      }
     } finally {
       setSaving(false);
     }
