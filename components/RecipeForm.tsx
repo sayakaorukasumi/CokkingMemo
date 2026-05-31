@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Upload, X } from "lucide-react";
 import { createRecipe, updateRecipe } from "@/lib/storage";
 import { VEG_PRESENCE_LABELS, ENERGY_LEVEL_LABELS, DISHWASHING_LABELS } from "@/lib/types";
@@ -32,7 +32,6 @@ function compressImage(file: File): Promise<string> {
 export default function RecipeForm({ recipe, onSuccess }: Props) {
   const [photo, setPhoto] = useState<string>(recipe?.photo || "");
   const [saving, setSaving] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -84,30 +83,30 @@ export default function RecipeForm({ recipe, onSuccess }: Props) {
       {/* 写真 */}
       <div>
         <label className="label">写真</label>
-        <div
-          className="relative w-full aspect-[16/9] bg-pink-50 rounded-2xl border-2 border-dashed border-pink-200 flex items-center justify-center cursor-pointer overflow-hidden"
-          onClick={() => fileRef.current?.click()}
-        >
+        <div className="relative w-full aspect-[4/3] bg-pink-50 rounded-2xl border-2 border-dashed border-pink-200 overflow-hidden">
           {photo ? (
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={photo} alt="料理写真" className="w-full h-full object-cover" />
+              <img src={photo} alt="料理写真" className="w-full h-full object-contain" />
               <button
                 type="button"
                 className="absolute top-2 right-2 bg-white/80 rounded-full p-1"
-                onClick={(e) => { e.stopPropagation(); setPhoto(""); }}
+                onClick={() => setPhoto("")}
               >
                 <X size={16} />
               </button>
             </>
           ) : (
-            <div className="flex flex-col items-center gap-2 text-pink-300">
+            <label
+              htmlFor="photo-file-input"
+              className="flex flex-col items-center justify-center gap-2 text-pink-300 w-full h-full cursor-pointer"
+            >
               <Upload size={32} />
               <span className="text-sm">写真を追加</span>
-            </div>
+            </label>
           )}
         </div>
-        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+        <input id="photo-file-input" type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
       </div>
 
       {/* 料理名 */}
