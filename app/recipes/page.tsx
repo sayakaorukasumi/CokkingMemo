@@ -49,6 +49,7 @@ function RecipeDetail({
 }) {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [logs, setLogs] = useState<CookingLog[]>([]);
+  const [loadError, setLoadError] = useState(false);
 
   const refresh = useCallback(() => {
     const r = getRecipe(id);
@@ -57,7 +58,7 @@ function RecipeDetail({
   }, [id]);
 
   useEffect(() => {
-    initStorage().then(refresh);
+    initStorage().then(refresh).catch(() => setLoadError(true));
   }, [refresh]);
 
   async function handleDelete() {
@@ -71,10 +72,20 @@ function RecipeDetail({
     refresh();
   }
 
+  if (loadError) {
+    return (
+      <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "1rem" }}>
+        <p style={{ color: "#dc2626" }}>データを読み込めませんでした</p>
+        <button onClick={onBack} style={{ color: "#f472b6", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>← 戻る</button>
+      </div>
+    );
+  }
+
   if (!recipe) {
     return (
-      <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "white", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "1rem" }}>
         <p style={{ color: "#9ca3af" }}>読み込み中...</p>
+        <button onClick={onBack} style={{ color: "#9ca3af", background: "none", border: "none", cursor: "pointer", fontSize: "0.875rem" }}>← 戻る</button>
       </div>
     );
   }
@@ -82,7 +93,7 @@ function RecipeDetail({
   const hasNutrition = recipe.calorie || recipe.protein || recipe.fat || recipe.carbs || recipe.fiber;
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "var(--background)", overflowY: "auto" }}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "var(--background)", overflowY: "scroll", WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-5" style={{ paddingBottom: "5rem" }}>
         {/* ヘッダー */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -260,21 +271,32 @@ function RecipeEdit({
   onCancel: () => void;
 }) {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
-    initStorage().then(() => setRecipe(getRecipe(id)));
+    initStorage().then(() => setRecipe(getRecipe(id))).catch(() => setLoadError(true));
   }, [id]);
+
+  if (loadError) {
+    return (
+      <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "1rem" }}>
+        <p style={{ color: "#dc2626" }}>データを読み込めませんでした</p>
+        <button onClick={onCancel} style={{ color: "#f472b6", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>← 戻る</button>
+      </div>
+    );
+  }
 
   if (!recipe) {
     return (
-      <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "white", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "1rem" }}>
         <p style={{ color: "#9ca3af" }}>読み込み中...</p>
+        <button onClick={onCancel} style={{ color: "#9ca3af", background: "none", border: "none", cursor: "pointer", fontSize: "0.875rem" }}>← 戻る</button>
       </div>
     );
   }
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "var(--background)", overflowY: "auto" }}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "var(--background)", overflowY: "scroll", WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
       <div className="max-w-2xl mx-auto px-4 py-6" style={{ paddingBottom: "5rem" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.5rem" }}>
           <button onClick={onCancel} style={{ color: "#9ca3af", display: "flex", alignItems: "center", background: "none", border: "none", cursor: "pointer" }}>
@@ -311,7 +333,7 @@ function RecipesContent() {
   }
 
   useEffect(() => {
-    initStorage().then(loadRecipes);
+    initStorage().then(loadRecipes).catch(() => setRecipes([]));
   }, []);
 
   const filtered = recipes
