@@ -9,6 +9,7 @@ import {
   getLogsForRecipe,
   deleteRecipeById,
   toggleFavoriteById,
+  initStorage,
 } from "@/lib/storage";
 import type { Recipe, CookingLog } from "@/lib/types";
 import {
@@ -33,7 +34,7 @@ import {
   Leaf,
 } from "lucide-react";
 
-/* ─── Detail Overlay ─────────────────────────────── */
+/* ─── Detail Overlay ─────────────────────────── */
 
 function RecipeDetail({
   id,
@@ -56,17 +57,17 @@ function RecipeDetail({
   }, [id]);
 
   useEffect(() => {
-    refresh();
+    initStorage().then(refresh);
   }, [refresh]);
 
-  function handleDelete() {
+  async function handleDelete() {
     if (!confirm("このレシピを削除しますか？")) return;
-    deleteRecipeById(id);
+    await deleteRecipeById(id);
     onDeleted();
   }
 
-  function handleToggleFavorite() {
-    toggleFavoriteById(id);
+  async function handleToggleFavorite() {
+    await toggleFavoriteById(id);
     refresh();
   }
 
@@ -247,7 +248,7 @@ function RecipeDetail({
   );
 }
 
-/* ─── Edit Overlay ───────────────────────────────── */
+/* ─── Edit Overlay ────────────────────────── */
 
 function RecipeEdit({
   id,
@@ -261,7 +262,7 @@ function RecipeEdit({
   const [recipe, setRecipe] = useState<Recipe | null>(null);
 
   useEffect(() => {
-    setRecipe(getRecipe(id));
+    initStorage().then(() => setRecipe(getRecipe(id)));
   }, [id]);
 
   if (!recipe) {
@@ -287,7 +288,7 @@ function RecipeEdit({
   );
 }
 
-/* ─── Main Content ───────────────────────────────── */
+/* ─── Main Content ────────────────────────── */
 
 function RecipesContent() {
   const router = useRouter();
@@ -310,7 +311,7 @@ function RecipesContent() {
   }
 
   useEffect(() => {
-    loadRecipes();
+    initStorage().then(loadRecipes);
   }, []);
 
   const filtered = recipes
@@ -465,7 +466,7 @@ function ListContent({
   );
 }
 
-/* ─── Page Export ────────────────────────────────── */
+/* ─── Page Export ─────────────────────────── */
 
 export default function RecipesPage() {
   return (

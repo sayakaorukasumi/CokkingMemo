@@ -8,8 +8,8 @@ import type { Recipe } from "@/lib/types";
 
 type Props = { recipe?: Recipe; onSuccess: (id: number) => void };
 
-// localStorage は容量が小さいので、1枚あたり約 250KB 以下を目標に
-// 解像度と画質を段階的に下げながら圧縮する。
+// 保存先は IndexedDB だが、表示や読み込みを軽くするため
+// 1枚あたり約 250KB 以下を目標に解像度と画質を段階的に下げて圧縮する。
 const TARGET_BYTES = 250_000;
 
 function compressImage(file: File): Promise<string> {
@@ -98,10 +98,10 @@ export default function RecipeForm({ recipe, onSuccess }: Props) {
       };
 
       if (recipe) {
-        updateRecipe(recipe.id, data);
+        await updateRecipe(recipe.id, data);
         onSuccess(recipe.id);
       } else {
-        const created = createRecipe(data);
+        const created = await createRecipe(data);
         onSuccess(created.id);
       }
     } catch (err) {
