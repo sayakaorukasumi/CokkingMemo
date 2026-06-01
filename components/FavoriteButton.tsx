@@ -15,8 +15,8 @@ export default function FavoriteButton({
 }) {
   const [isFavorite, setIsFavorite] = useState(initialFavorite);
 
-  function handleClick() {
-    toggleFavoriteById(id);
+  async function handleClick() {
+    await toggleFavoriteById(id);
     const updated = getRecipe(id);
     setIsFavorite(updated?.isFavorite ?? !isFavorite);
     onToggle?.();

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { getRecipes } from "@/lib/storage";
+import { getRecipes, initStorage } from "@/lib/storage";
 import type { Recipe } from "@/lib/types";
 import RecipeCard from "@/components/RecipeCard";
 import { ENERGY_LEVEL_LABELS } from "@/lib/types";
@@ -15,7 +15,7 @@ export default function HomePage() {
   const [maxTimeFilter, setMaxTimeFilter] = useState("");
 
   useEffect(() => {
-    setAllRecipes(getRecipes());
+    initStorage().then(() => setAllRecipes(getRecipes()));
   }, []);
 
   const isFiltered = energyFilter !== "" || maxTimeFilter !== "";

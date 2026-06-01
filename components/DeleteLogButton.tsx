@@ -10,8 +10,8 @@ export default function DeleteLogButton({
   logId: number;
   onDelete: () => void;
 }) {
-  function handleClick() {
-    deleteLogById(logId);
+  async function handleClick() {
+    await deleteLogById(logId);
     onDelete();
   }
 

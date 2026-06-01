@@ -13,10 +13,10 @@ export default function DeleteButton({
 }) {
   const [deleting, setDeleting] = useState(false);
 
-  function handleClick() {
+  async function handleClick() {
     if (!confirm("このレシピを削除しますか？")) return;
     setDeleting(true);
-    deleteRecipeById(id);
+    await deleteRecipeById(id);
     onDelete();
   }
 

@@ -15,11 +15,11 @@ export default function CookingLogForm({
 
   const today = new Date().toISOString().split("T")[0];
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSaving(true);
     const fd = new FormData(e.currentTarget);
-    addLog({
+    await addLog({
       recipeId,
       cookedAt: fd.get("cookedAt") as string,
       wentWell: fd.get("wentWell") === "true",
