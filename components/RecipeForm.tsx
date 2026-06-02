@@ -125,11 +125,11 @@ export default function RecipeForm({ recipe, onSuccess }: Props) {
       {/* 写真 */}
       <div>
         <label className="label">写真</label>
-        <div className="relative w-full aspect-[4/3] bg-pink-50 rounded-2xl border-2 border-dashed border-pink-200 overflow-hidden">
+        <div className="relative w-full aspect-square bg-pink-50 rounded-2xl border-2 border-dashed border-pink-200 overflow-hidden">
           {photo ? (
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={photo} alt="料理写真" className="w-full h-full object-contain" />
+              <img src={photo} alt="料理写真" className="w-full h-full object-cover" />
               <button
                 type="button"
                 className="absolute top-2 right-2 bg-white/80 rounded-full p-1"

@@ -34,6 +34,86 @@ import {
   Leaf,
 } from "lucide-react";
 
+/* ─── Comment Bubble ────────────────────────── */
+
+function CommentBubble({
+  name,
+  emoji,
+  comment,
+  label,
+  avatarBg,
+  avatarColor,
+  bubbleBg,
+  bubbleBorder,
+  nameColor,
+}: {
+  name: string;
+  emoji: string;
+  comment: string;
+  label?: string;
+  avatarBg: string;
+  avatarColor: string;
+  bubbleBg: string;
+  bubbleBorder: string;
+  nameColor: string;
+}) {
+  return (
+    <div style={{ display: "flex", alignItems: "flex-start", gap: "0.625rem" }}>
+      {/* アバター */}
+      <div
+        style={{
+          flexShrink: 0,
+          width: "2.75rem",
+          height: "2.75rem",
+          borderRadius: "9999px",
+          background: avatarBg,
+          color: avatarColor,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
+        }}
+      >
+        <span style={{ fontSize: "1.125rem", lineHeight: 1 }}>{emoji}</span>
+        <span style={{ fontSize: "0.625rem", fontWeight: 700, marginTop: "1px" }}>{name}</span>
+      </div>
+
+      {/* 吹き出し */}
+      <div style={{ position: "relative", flex: 1, minWidth: 0 }}>
+        {/* しっぽ */}
+        <div
+          style={{
+            position: "absolute",
+            left: "-6px",
+            top: "0.875rem",
+            width: 0,
+            height: 0,
+            borderTop: "6px solid transparent",
+            borderBottom: "6px solid transparent",
+            borderRight: `7px solid ${bubbleBorder}`,
+          }}
+        />
+        <div
+          style={{
+            background: bubbleBg,
+            border: `1px solid ${bubbleBorder}`,
+            borderRadius: "1rem",
+            padding: "0.625rem 0.875rem",
+          }}
+        >
+          <p style={{ fontSize: "0.75rem", fontWeight: 700, color: nameColor, marginBottom: "0.25rem" }}>
+            {label ? `${name}（${label}）` : `${name}コメント`}
+          </p>
+          <p style={{ fontSize: "0.875rem", color: "#4b5563", whiteSpace: "pre-line", lineHeight: 1.7 }}>
+            {comment}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Detail Overlay ─────────────────────────── */
 
 function RecipeDetail({
@@ -122,9 +202,27 @@ function RecipeDetail({
 
         {/* 写真 */}
         {recipe.photo && (
-          <div style={{ position: "relative", width: "100%", aspectRatio: "16/9", borderRadius: "1rem", overflow: "hidden", background: "#fdf2f8" }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={recipe.photo} alt={recipe.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <div
+              style={{
+                position: "relative",
+                width: "100%",
+                maxWidth: "320px",
+                aspectRatio: "1/1",
+                borderRadius: "1.5rem",
+                overflow: "hidden",
+                background: "linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%)",
+                padding: "0.75rem",
+                boxShadow: "0 4px 16px rgba(236, 72, 153, 0.12)",
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={recipe.photo}
+                alt={recipe.name}
+                style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: "1rem" }}
+              />
+            </div>
           </div>
         )}
 
@@ -197,26 +295,45 @@ function RecipeDetail({
           </div>
         )}
 
-        {/* コメント */}
+        {/* コメント（吹き出しUI） */}
         {(recipe.kaoriComment || recipe.kasumiComment || recipe.personalMemo) && (
-          <div className="card space-y-3">
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
             {recipe.kaoriComment && (
-              <div>
-                <p style={{ fontSize: "0.75rem", fontWeight: 600, color: "#ec4899", marginBottom: "2px" }}>💬 薫コメント</p>
-                <p style={{ fontSize: "0.875rem", color: "#4b5563", whiteSpace: "pre-line" }}>{recipe.kaoriComment}</p>
-              </div>
+              <CommentBubble
+                name="薫"
+                emoji="🍮"
+                comment={recipe.kaoriComment}
+                avatarBg="#fcd9b6"
+                avatarColor="#b45309"
+                bubbleBg="#fff7ed"
+                bubbleBorder="#fde0c4"
+                nameColor="#d97706"
+              />
             )}
             {recipe.kasumiComment && (
-              <div>
-                <p style={{ fontSize: "0.75rem", fontWeight: 600, color: "#8b5cf6", marginBottom: "2px" }}>💬 霞コメント</p>
-                <p style={{ fontSize: "0.875rem", color: "#4b5563", whiteSpace: "pre-line" }}>{recipe.kasumiComment}</p>
-              </div>
+              <CommentBubble
+                name="霞"
+                emoji="🌸"
+                comment={recipe.kasumiComment}
+                avatarBg="#e9d5ff"
+                avatarColor="#7c3aed"
+                bubbleBg="#faf5ff"
+                bubbleBorder="#e9d5ff"
+                nameColor="#8b5cf6"
+              />
             )}
             {recipe.personalMemo && (
-              <div>
-                <p style={{ fontSize: "0.75rem", fontWeight: 600, color: "#6b7280", marginBottom: "2px" }}>📝 自分用メモ</p>
-                <p style={{ fontSize: "0.875rem", color: "#4b5563", whiteSpace: "pre-line" }}>{recipe.personalMemo}</p>
-              </div>
+              <CommentBubble
+                name="さや"
+                label="自分用メモ"
+                emoji="🐥"
+                comment={recipe.personalMemo}
+                avatarBg="#fbcfe8"
+                avatarColor="#be185d"
+                bubbleBg="#fdf2f8"
+                bubbleBorder="#fbcfe8"
+                nameColor="#ec4899"
+              />
             )}
           </div>
         )}

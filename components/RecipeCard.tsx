@@ -9,7 +9,7 @@ export default function RecipeCard({ recipe }: { recipe: Recipe }) {
   return (
     <Link href={`/recipes?id=${recipe.id}`} className="group block">
       <div className="bg-white rounded-2xl shadow-sm border border-pink-50 overflow-hidden hover:shadow-md transition-shadow">
-        <div className="relative aspect-[4/3] bg-pink-50">
+        <div className="relative aspect-square bg-pink-50">
           {recipe.photo ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
