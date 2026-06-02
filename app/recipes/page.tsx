@@ -36,23 +36,21 @@ import {
 
 /* ─── Comment Bubble ────────────────────────── */
 
+const BASE_PATH = "/CokkingMemo";
+
 function CommentBubble({
   name,
-  emoji,
+  avatarSrc,
   comment,
   label,
-  avatarBg,
-  avatarColor,
   bubbleBg,
   bubbleBorder,
   nameColor,
 }: {
   name: string;
-  emoji: string;
+  avatarSrc: string;
   comment: string;
   label?: string;
-  avatarBg: string;
-  avatarColor: string;
   bubbleBg: string;
   bubbleBorder: string;
   nameColor: string;
@@ -63,20 +61,17 @@ function CommentBubble({
       <div
         style={{
           flexShrink: 0,
-          width: "2.75rem",
-          height: "2.75rem",
+          width: "3rem",
+          height: "3rem",
           borderRadius: "9999px",
-          background: avatarBg,
-          color: avatarColor,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
+          overflow: "hidden",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
+          border: `2px solid ${bubbleBorder}`,
+          background: bubbleBg,
         }}
       >
-        <span style={{ fontSize: "1.125rem", lineHeight: 1 }}>{emoji}</span>
-        <span style={{ fontSize: "0.625rem", fontWeight: 700, marginTop: "1px" }}>{name}</span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={avatarSrc} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
       </div>
 
       {/* 吹き出し */}
@@ -301,10 +296,8 @@ function RecipeDetail({
             {recipe.kaoriComment && (
               <CommentBubble
                 name="薫"
-                emoji="🍮"
+                avatarSrc={`${BASE_PATH}/images/avatar-kaoru.png`}
                 comment={recipe.kaoriComment}
-                avatarBg="#fcd9b6"
-                avatarColor="#b45309"
                 bubbleBg="#fff7ed"
                 bubbleBorder="#fde0c4"
                 nameColor="#d97706"
@@ -313,10 +306,8 @@ function RecipeDetail({
             {recipe.kasumiComment && (
               <CommentBubble
                 name="霞"
-                emoji="🌸"
+                avatarSrc={`${BASE_PATH}/images/avatar-kasumi.jpeg`}
                 comment={recipe.kasumiComment}
-                avatarBg="#e9d5ff"
-                avatarColor="#7c3aed"
                 bubbleBg="#faf5ff"
                 bubbleBorder="#e9d5ff"
                 nameColor="#8b5cf6"
@@ -326,10 +317,8 @@ function RecipeDetail({
               <CommentBubble
                 name="さや"
                 label="自分用メモ"
-                emoji="🐥"
+                avatarSrc={`${BASE_PATH}/images/avatar-saya.png`}
                 comment={recipe.personalMemo}
-                avatarBg="#fbcfe8"
-                avatarColor="#be185d"
                 bubbleBg="#fdf2f8"
                 bubbleBorder="#fbcfe8"
                 nameColor="#ec4899"
