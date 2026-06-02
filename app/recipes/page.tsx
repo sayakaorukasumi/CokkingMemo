@@ -61,8 +61,8 @@ function CommentBubble({
       <div
         style={{
           flexShrink: 0,
-          width: "3.9rem",
-          height: "3.9rem",
+          width: "5rem",
+          height: "5rem",
           borderRadius: "9999px",
           overflow: "hidden",
           boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
